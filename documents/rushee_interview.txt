@@ -1,0 +1,24 @@
+<html>
+  <body>
+    <p>Hi %s,
+    <br> <br>  
+Thank you for your interest in joining Alpha Kappa Psi. 
+<br> <br>
+In order to be considered in our pledging program, you will need to participate in a mandatory interview for the next phase of the application process. This interview will take no longer than 30 minutes & will help our decision on whether to extend you a bid.
+<br> <br>
+   <u><strong>Interview Information:</strong></u><br>
+    <strong>Date:</strong> %s<br>
+    <strong>Time:</strong> %s <br>
+    <strong>Location:</strong> %s <br>
+    <strong>Attire:</strong> Business Casual  <br>
+<br>
+If you will be late or if you can no longer make it to your interview, please let us know as soon as possible. I may be reached at %s or rush@sjsuakpsi.com for any questions or concerns.  <br>
+<br>
+We are looking forward to speaking with you!<br>
+<br>
+Sincerely, <br>
+%s <br>
+Vice President of Membership
+    </p>
+  </body>
+</html>
