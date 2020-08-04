@@ -179,8 +179,8 @@ def main():
             Pop_Up("Schedule Error", "No Selection was made. Exiting Program")
             return
          elif(scheduled.option):
-             info = get_scheduled_info()
-             if(info == None):
+             scheduled_time = get_scheduled_info()
+             if(scheduled_time == None):
                  return
     subject_line = get_subject_line()
     #user presses cancels
@@ -259,14 +259,17 @@ def main():
                     pass
                 else:
                    if(scheduled.option):
-                       pass
+                       print(scheduled_time.timestamp() - time.time())
+                       time.sleep(scheduled_time.timestamp() - time.time())
+                       server.sendmail(sender, receiver, message.as_string())
                    else:
                        server.sendmail(sender, receiver, message.as_string())
 
                 #won't make a pop up for each individual bc its annoying
                 if(not send_all):
                     pop_up = Pop_Up("Email Sent", "Email sent @" + receiver + "!")
-                    pop_up.make_window()    
+                    pop_up.make_window() 
+                server.quit()
     pop_up = Pop_Up("Complete", "All Emails Sent!")
     pop_up.make_window()
 
