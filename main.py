@@ -260,7 +260,7 @@ def main():
                 else:
                    if(scheduled.option):
                        print(scheduled_time.timestamp() - time.time())
-                       time.sleep(scheduled_time.timestamp() - time.time())
+                       time.sleep(scheduled_time.timestamp() - (int) (time.time()))
                        server.sendmail(sender, receiver, message.as_string())
                    else:
                        server.sendmail(sender, receiver, message.as_string())
