@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 from email_window import Email_Window
+from decision_window import Decision_Window
 from pop_up import Pop_Up
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -97,6 +98,9 @@ def read_email_info(filename):
 
 
 def main():
+    decision = Decision_Window()
+    decision.make_window()
+
     subject_line = get_user_input()
 
     #user presses cancels
