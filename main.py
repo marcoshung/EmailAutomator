@@ -5,7 +5,7 @@ import smtplib, ssl
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
-from window import Window
+from email_window import Email_Window
 from pop_up import Pop_Up
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -151,7 +151,7 @@ def main():
 
         #this prevents the individual email preview from popping up
         if(not send_all):
-            email_text_window = Window(soup.text)
+            email_text_window = Email_Window(soup.text)
             email_text_window.make_window()
 
         if(email_text_window.skip_all):

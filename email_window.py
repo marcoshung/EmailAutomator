@@ -1,7 +1,7 @@
 #Marcos Hung
 from tkinter import *
 
-class Window:
+class Email_Window:
     def __init__(self, display_text):
         self.root = Tk()
         self.display_text = display_text
