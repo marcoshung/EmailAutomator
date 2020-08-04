@@ -14,13 +14,14 @@ import tkinter as tk
 import html2text
 from tkinter import *
 from tkinter import simpledialog
+from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 from pathlib import Path
 
 port = 465
 context = ssl.create_default_context()
 
-def get_user_input():
+def get_subject_line():
     root = tk.Tk()
     root.withdraw()
     line= simpledialog.askstring(title="Subject Line", prompt="Enter the Subject Line You Want to Use for All the Emails") 
@@ -36,7 +37,7 @@ def get_email_info():
     t.insert(END, "Pick Your Excel File With the Email Information")
     root.update()
     #only accept excel files for email info
-    email_info = askopenfilename(filetypes=[("Excel files", ".xlsx .xls")])
+    email_info = askopenfilename(title = "Get Email Information", filetypes=[("Excel files", ".xlsx .xls")])
     root.destroy()
     return email_info
 
@@ -51,7 +52,7 @@ def get_email_template():
     root.update()
 
     #gets file name from user selection
-    filename = askopenfilename(filetypes=[(".txt files", ".txt")])
+    filename = askopenfilename(title = "Get Email Template", filetypes=[(".txt files", ".txt")])
     if(len(filename) == 0):
         return
     template_file  = open(filename, mode = 'r')
@@ -74,7 +75,7 @@ def read_creds():
     t.pack(in_ = root, side = TOP)
     t.insert(END, "Pick Your Creditional Text File (.txt File)")
     root.update()
-    filename = askopenfilename(filetypes=[(".txt files", ".txt")])
+    filename = askopenfilename(title = "Get Creditional File", filetypes=[(".txt files", ".txt")])
     root.destroy()
 
     #returns empty usr and pass if no file was selected
@@ -98,10 +99,13 @@ def read_email_info(filename):
 
 
 def main():
+  
     decision = Decision_Window()
     decision.make_window()
-
-    subject_line = get_user_input()
+    if(decision.recurring == None):
+        Pop_Up("No Selection", "No Selection was made. Exiting Program now").make_window()
+        return
+    subject_line = get_subject_line()
 
     #user presses cancels
     if subject_line == None:

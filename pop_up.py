@@ -1,5 +1,7 @@
 #Marcos Hung
-from tkinter import *
+import tkinter as tk
+from tkinter import Tk
+from tkinter import messagebox
 
 class Pop_Up:
     def __init__(self, title,display_text):
@@ -11,12 +13,8 @@ class Pop_Up:
         self.root.destroy()
 
     def make_window(self):
-        self.root.title(self.title)
-        t = Text(self.root, height = 2, width = 75)
-        t.pack()
-        t.insert(END, self.display_text)
-        quit_button = Button(self.root, text="Done", width=10, height=2, command=self.quit)
-        quit_button.pack()
-        self.root.mainloop()
+        self.root.withdraw()
+        messagebox.showinfo(title=self.title, message= self.display_text) 
+        self.root.destroy()
 
 
