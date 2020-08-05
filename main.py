@@ -211,6 +211,7 @@ def main():
 
     #automator for sending emails
     send_all = False
+    send_scheduled = False
     for i in range(len(excel_email_info)):
         message = MIMEMultipart("alternative")
         message["Subject"] = subject_line
@@ -259,9 +260,12 @@ def main():
                     pass
                 else:
                    if(scheduled.option):
-                       print(scheduled_time.timestamp() - time.time())
-                       time.sleep(scheduled_time.timestamp() - (int) (time.time()))
+                       #check if the first schedule has been sent. this is bc if the loop goes to the sleep method it will sleep again causing error
+                       if(not send_scheduled):
+                            time.sleep(scheduled_time.timestamp() - (int) (time.time()))
+                            send_scheduled = True
                        server.sendmail(sender, receiver, message.as_string())
+
                    else:
                        server.sendmail(sender, receiver, message.as_string())
 
