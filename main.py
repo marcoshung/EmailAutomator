@@ -114,7 +114,7 @@ def get_recurring_info():
 
     valid = False
     while(not valid):
-        end_date_window = User_Input("Enter Starting Date", "Enter Starting Date you want to send the emails in MM-DD-YYYY form.")
+        end_date_window = User_Input("Enter Ending Date", "Enter Ending Date you want to send the emails in MM-DD-YYYY form.")
         end_date = start_date_window.make_window()
         try:
             datetime.datetime.strptime(end_date, '%m-%d-%Y')
@@ -159,6 +159,8 @@ def get_scheduled_info():
         Pop_Up("Date and Time Error", "This date and time has already past").make_window()
         return
     return dt
+
+
 def main():
     #reccuring or not
     recurring = Decision_Window("Recurring or one Time", "Is this event Recurring or One Time?", "Recurring", "One Time")
@@ -255,21 +257,23 @@ def main():
                     cred_error = Pop_Up("Credential Error", "Credentials Incorrcet. Please check to make sure your credential file is correct")
                     cred_error.make_window()
                     return
-
+                #recurring
                 if(recurring.option):
                     pass
+                #one time
                 else:
+                    #scheduled
                    if(scheduled.option):
                        #check if the first schedule has been sent. this is bc if the loop goes to the sleep method it will sleep again causing error
                        if(not send_scheduled):
-                            time.sleep(scheduled_time.timestamp() - (int) (time.time()))
+                            time.sleep(scheduled_time.timestamp() - time.time())
                             send_scheduled = True
                        server.sendmail(sender, receiver, message.as_string())
-
+                    #immediately
                    else:
                        server.sendmail(sender, receiver, message.as_string())
 
-                #won't make a pop up for each individual bc its annoying
+                #won't make a pop up for each individual if send all option was chosen bc its annoying
                 if(not send_all):
                     pop_up = Pop_Up("Email Sent", "Email sent @" + receiver + "!")
                     pop_up.make_window() 
