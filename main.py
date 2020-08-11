@@ -11,6 +11,8 @@ from pop_up import Pop_Up
 from user_input_pop_up import User_Input
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 import tkinter as tk
 import html2text
 from tkinter import *
@@ -19,6 +21,7 @@ from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 import datetime
 import time
+import os
 
 port = 465
 context = ssl.create_default_context()
@@ -160,7 +163,31 @@ def get_scheduled_info():
         return
     return dt
 
+def get_attachment():
+    root = tk.Tk()
+    root.title("Pick Your Attachment")
+    t = Text(root, height = 2, width = 40)
+    t.pack(in_ = root, side = TOP)
+    t.insert(END, "Pick Your Attachment (NOTE* This attachment will be attached to ALL emails. Do not use this feature to send customized attachments to individuals")
+    root.update()
+    attachment_name = askopenfilename(title = "Get Attachment")
+    root.destroy()
 
+    # Open PDF file in binary mode
+    with open(attachment_name, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition","attachment", filename= os.path.basename(attachment_name))
+    if(not part):
+        Pop_Up("Attachment Error", "File Error")
+    return part
+
+    
 def main():
     #reccuring or not
     recurring = Decision_Window("Recurring or one Time", "Is this event Recurring or One Time?", "Recurring", "One Time")
@@ -210,6 +237,19 @@ def main():
     if(email_template == None):
         Pop_Up("Template Error", "No Template Was Selected").make_window()
         return
+    
+    #attachments
+    attachments = []
+    attachment_window = Decision_Window("Attachments", "Would you like to add an Attachment?", "Yes", "No")
+    attachment_window.make_window()
+    if(attachment_window.option):
+        done = False
+        while(not done):
+            attachments.append(get_attachment())
+            again = Decision_Window("Add Another?", "Would You like to add another attachment?", "Yes", "No")
+            again.make_window()
+            if(not again.option):
+                done = True
 
     #automator for sending emails
     send_all = False
@@ -233,6 +273,9 @@ def main():
 
         #constructs email message body
         html_attachment = MIMEText(html_part, "html")
+        if(not len(attachments) == 0):
+            for attachment in attachments:
+                message.attach(attachment)
         message.attach(html_attachment)
         soup = BeautifulSoup(html2text.html2text(html_part), 'lxml')
 
