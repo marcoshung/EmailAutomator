@@ -6,20 +6,24 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 from email_window import Email_Window
+from decision_window import Decision_Window
 from pop_up import Pop_Up
+from user_input_pop_up import User_Input
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import tkinter as tk
 import html2text
 from tkinter import *
 from tkinter import simpledialog
+from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
-from pathlib import Path
+import datetime
+import time
 
 port = 465
 context = ssl.create_default_context()
 
-def get_user_input():
+def get_subject_line():
     root = tk.Tk()
     root.withdraw()
     line= simpledialog.askstring(title="Subject Line", prompt="Enter the Subject Line You Want to Use for All the Emails") 
@@ -35,7 +39,7 @@ def get_email_info():
     t.insert(END, "Pick Your Excel File With the Email Information")
     root.update()
     #only accept excel files for email info
-    email_info = askopenfilename(filetypes=[("Excel files", ".xlsx .xls")])
+    email_info = askopenfilename(title = "Get Email Information", filetypes=[("Excel files", ".xlsx .xls")])
     root.destroy()
     return email_info
 
@@ -50,7 +54,7 @@ def get_email_template():
     root.update()
 
     #gets file name from user selection
-    filename = askopenfilename(filetypes=[(".txt files", ".txt")])
+    filename = askopenfilename(title = "Get Email Template", filetypes=[(".txt files", ".txt")])
     if(len(filename) == 0):
         return
     template_file  = open(filename, mode = 'r')
@@ -73,7 +77,7 @@ def read_creds():
     t.pack(in_ = root, side = TOP)
     t.insert(END, "Pick Your Creditional Text File (.txt File)")
     root.update()
-    filename = askopenfilename(filetypes=[(".txt files", ".txt")])
+    filename = askopenfilename(title = "Get Creditional File", filetypes=[(".txt files", ".txt")])
     root.destroy()
 
     #returns empty usr and pass if no file was selected
@@ -95,21 +99,105 @@ def read_email_info(filename):
         email_info.append(values.tolist())
     return email_info
 
+#emails that will be sent on a recurring basis
+def get_recurring_info():
+    valid = False
+    #while loop allows user to retry entering input if they inputted date or time incorrectly
+    while(not valid):
+        start_date_window = User_Input("Enter Starting Date", "Enter Starting Date you want to send the emails in MM-DD-YYYY form.")
+        start_date = start_date_window.make_window()
+        try:
+            datetime.datetime.strptime(start_date, '%m-%d-%Y')
+            valid = True
+        except:
+            Pop_Up("Date Error", "Incorrect Date Format. Try Again").make_window()
+
+    valid = False
+    while(not valid):
+        end_date_window = User_Input("Enter Ending Date", "Enter Ending Date you want to send the emails in MM-DD-YYYY form.")
+        end_date = start_date_window.make_window()
+        try:
+            datetime.datetime.strptime(end_date, '%m-%d-%Y')
+            valid = True
+        except:
+            Pop_Up("Date Error", "Incorrect Date Format. Try Again").make_window()  
+    valid = False
+    while(not valid):
+        time_window = User_Input("Enter Time", "Enter Time you want to send the emails in HH:MM format.")
+        time = time_window.make_window()
+        try:
+            datetime.datetime.strptime(time, '%H:%M')
+            valid = True
+        except:
+             Pop_Up("Time Error", "Incorrect Time Format. Try Again").make_window()
+
+#info that will be sent at one specific time
+def get_scheduled_info():
+    valid = False
+    #while loop allows user to retry entering input if they inputted date or time incorrectly
+    while(not valid):
+        date_window = User_Input("Enter Date", "Enter Date you want to send the emails in MM-DD-YYYY format.")
+        date = date_window.make_window()
+        try:
+            datetime.datetime.strptime(date, '%m-%d-%Y')
+            valid = True
+        except:
+            Pop_Up("Date Error", "Incorrect Date Format. Try Again").make_window()
+    valid = False
+    while(not valid):
+        time_window = User_Input("Enter Time", "Enter Time you want to send the emails in HH:MM format.")
+        time = time_window.make_window()
+        try:
+            datetime.datetime.strptime(time, '%H:%M')
+            valid = True
+        except:
+             Pop_Up("Time Error", "Incorrect Time Format. Try Again").make_window()
+    date = datetime.datetime.strptime(date, '%m-%d-%Y') 
+    time = datetime.datetime.strptime(time, '%H:%M')
+    dt= datetime.datetime(date.year, date.month, date.day, time.hour, time.minute)
+    if(dt < datetime.datetime.now()):
+        Pop_Up("Date and Time Error", "This date and time has already past").make_window()
+        return
+    return dt
+
 
 def main():
-    subject_line = get_user_input()
+    #reccuring or not
+    recurring = Decision_Window("Recurring or one Time", "Is this event Recurring or One Time?", "Recurring", "One Time")
+    recurring.make_window()
 
+    #user exits pop up
+    if(recurring.option == None):
+        Pop_Up("No Selection", "No Selection was made. Exiting Program now").make_window()
+        return
+
+    if(recurring.option):
+        get_recurring_info()
+    else:
+         scheduled = Decision_Window("Scheduled or Not Scheduled?", "Do you want to send these emails at a certain time or immediately?", 
+                                     "Scheduled", "Immediately")
+         scheduled.make_window()
+         if(scheduled.option == None):
+            Pop_Up("Schedule Error", "No Selection was made. Exiting Program")
+            return
+         elif(scheduled.option):
+             scheduled_time = get_scheduled_info()
+             if(scheduled_time == None):
+                 return
+    subject_line = get_subject_line()
     #user presses cancels
     if subject_line == None:
         exit_mes = Pop_Up("Program Exit", "Program will exit now")
         exit_mes.make_window()
         return 
+    
     #creds
     sender, password = read_creds()
     if sender == "" or password == "":
         cred_error = Pop_Up("Creditional Error", "No creditionals found")
         cred_error.make_window()
         return
+
     #email content 
     excel_file_name = get_email_info()
     excel_email_info = read_email_info(excel_file_name)
@@ -117,16 +205,15 @@ def main():
         Pop_Up("Excel Error", "There was no data in the excel file").make_window()
         return
 
+    #email template
     email_template = get_email_template()
-    
     if(email_template == None):
         Pop_Up("Template Error", "No Template Was Selected").make_window()
         return
-    send_all = False
-
-    print("Starting to send")
 
     #automator for sending emails
+    send_all = False
+    send_scheduled = False
     for i in range(len(excel_email_info)):
         message = MIMEMultipart("alternative")
         message["Subject"] = subject_line
@@ -164,13 +251,33 @@ def main():
 
         if(email_text_window.send or send_all):
             with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-                server.login(sender, password)
-                server.sendmail(sender, receiver, message.as_string())
+                try:
+                    server.login(sender, password)
+                except:
+                    cred_error = Pop_Up("Credential Error", "Credentials Incorrcet. Please check to make sure your credential file is correct")
+                    cred_error.make_window()
+                    return
+                #recurring
+                if(recurring.option):
+                    pass
+                #one time
+                else:
+                    #scheduled
+                   if(scheduled.option):
+                       #check if the first schedule has been sent. this is bc if the loop goes to the sleep method it will sleep again causing error
+                       if(not send_scheduled):
+                            time.sleep(scheduled_time.timestamp() - time.time())
+                            send_scheduled = True
+                       server.sendmail(sender, receiver, message.as_string())
+                    #immediately
+                   else:
+                       server.sendmail(sender, receiver, message.as_string())
 
-                #won't make a pop up for each individual bc its annoying
+                #won't make a pop up for each individual if send all option was chosen bc its annoying
                 if(not send_all):
                     pop_up = Pop_Up("Email Sent", "Email sent @" + receiver + "!")
-                    pop_up.make_window()    
+                    pop_up.make_window() 
+                server.quit()
     pop_up = Pop_Up("Complete", "All Emails Sent!")
     pop_up.make_window()
 
